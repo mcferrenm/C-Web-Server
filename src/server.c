@@ -148,6 +148,8 @@ void handle_http_request(int fd, struct cache *cache)
 {
     const int request_buffer_size = 65536; // 64K
     char request[request_buffer_size];
+    char method[200];
+    char path[8192];
 
     // Read request
     int bytes_recvd = recv(fd, request, request_buffer_size - 1, 0);
@@ -157,10 +159,20 @@ void handle_http_request(int fd, struct cache *cache)
         return;
     }
 
+    sscanf(request, "%s %s", method, path);
 
-    ///////////////////
-    // IMPLEMENT ME! //
-    ///////////////////
+    if(strcmp(method, "GET") == 0) {
+        if(strcmp(path, "/d20") == 0) {
+            printf("/d20\n");
+        } else {
+            // get_file();
+            printf("get file TODO!\n");
+        }
+    } else if (strcmp(method, "PUT") == 0) {
+        printf("TODO PUT!\n");
+    } else {
+        resp_404(fd);
+    }
 
     // Read the first two components of the first line of the request 
  
@@ -219,8 +231,6 @@ int main(void)
         // listenfd is still listening for new connections.
 
         handle_http_request(newfd, cache);
-
-        resp_404(newfd);
 
         close(newfd);
     }
