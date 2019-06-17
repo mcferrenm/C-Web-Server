@@ -64,12 +64,11 @@ int send_response(int fd, char *header, char *content_type, void *body, int cont
             "%s\n"
             "Date: %s\n"
             "Content-Type: %s\n"
+            "Connection: close\n"
             "Content-Length: %d\n"
             "\n"
             "%s",
             header, time_buf, content_type, len, body);
-
-    printf("%s", response);
 
     // Send it all!
     int rv = send(fd, response, response_length, 0);
@@ -87,17 +86,12 @@ int send_response(int fd, char *header, char *content_type, void *body, int cont
  */
 void get_d20(int fd)
 {
-    // Generate a random number between 1 and 20 inclusive
-    
-    ///////////////////
-    // IMPLEMENT ME! //
-    ///////////////////
+    srand(time(NULL));   // Initialization, should only be called once.
+    int r = rand() % 21;
+    char buf[sizeof(int)];
+    snprintf(buf, sizeof buf, "%d", r);
 
-    // Use send_response() to send it back as text/plain data
-
-    ///////////////////
-    // IMPLEMENT ME! //
-    ///////////////////
+    send_response(fd, "HTTP/1.1 200 OK", "text/plain", buf, sizeof(buf));
 }
 
 /**
@@ -171,7 +165,7 @@ void handle_http_request(int fd, struct cache *cache)
 
     if(strcmp(method, "GET") == 0) {
         if(strcmp(path, "/d20") == 0) {
-            printf("/d20\n");
+            get_d20(fd);
         } else {
             // get_file();
             printf("get file TODO!\n");
