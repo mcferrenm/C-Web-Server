@@ -57,19 +57,27 @@ int send_response(int fd, char *header, char *content_type, void *body, int cont
     struct tm tm = *gmtime(&now);
     strftime(time_buf, sizeof time_buf, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 
+    // TODO Fix content_length
+    // int len = strlen(body);
+
     // Build HTTP response and store it in response
     int response_length = sprintf(response, 
             "%s\n"
             "Date: %s\n"
             "Content-Type: %s\n"
-            "Connection: close\n"
             "Content-Length: %d\n"
-            "\n"
-            "%s",
-            header, time_buf, content_type, content_length, body);
+            "Connection: close\n"
+            "\n",
+            header, time_buf, content_type, content_length);
 
     // Send it all!
     int rv = send(fd, response, response_length, 0);
+
+    if (rv < 0) {
+        perror("send");
+    }
+    
+    rv = send(fd, body, content_length, 0);
 
     if (rv < 0) {
         perror("send");
@@ -179,6 +187,8 @@ void handle_http_request(int fd, struct cache *cache)
     if(strcmp(method, "GET") == 0) {
         if(strcmp(path, "/d20") == 0) {
             get_d20(fd);
+        } else if (strcmp(path, "/") == 0) {
+            get_file(fd, cache, "/index.html");
         } else {
             get_file(fd, cache, path);
         }
