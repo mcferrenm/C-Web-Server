@@ -57,8 +57,6 @@ int send_response(int fd, char *header, char *content_type, void *body, int cont
     struct tm tm = *gmtime(&now);
     strftime(time_buf, sizeof time_buf, "%a, %d %b %Y %H:%M:%S %Z", &tm);
 
-    int len = strlen(body);
-
     // Build HTTP response and store it in response
     int response_length = sprintf(response, 
             "%s\n"
@@ -68,7 +66,7 @@ int send_response(int fd, char *header, char *content_type, void *body, int cont
             "Content-Length: %d\n"
             "\n"
             "%s",
-            header, time_buf, content_type, len, body);
+            header, time_buf, content_type, content_length, body);
 
     // Send it all!
     int rv = send(fd, response, response_length, 0);
@@ -87,7 +85,7 @@ int send_response(int fd, char *header, char *content_type, void *body, int cont
 void get_d20(int fd)
 {
     srand(time(NULL));   // Initialization, should only be called once.
-    int r = rand() % 21;
+    int r = rand() % 20 + 1;
     char buf[sizeof(int)];
     snprintf(buf, sizeof buf, "%d", r);
 
@@ -189,15 +187,7 @@ void handle_http_request(int fd, struct cache *cache)
     } else {
         resp_404(fd);
     }
-
-    // Read the first two components of the first line of the request 
- 
-    // If GET, handle the get endpoints
-
-    //    Check if it's /d20 and handle that special case
-    //    Otherwise serve the requested file by calling get_file()
-
-
+    
     // (Stretch) If POST, handle the post request
 }
 
